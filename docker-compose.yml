@@ -5,6 +5,8 @@ services:
     image: registry.cn-hangzhou.aliyuncs.com/mymiddle/new-api:latest
     container_name: new-api
     restart: always
+    networks:
+      - api_network
     command: --log-dir /app/logs
     ports:
       - "8801:3000"
@@ -36,20 +38,28 @@ services:
     image: registry.cn-hangzhou.aliyuncs.com/mymiddle/nginx:latest
     container_name: redis
     restart: always
+    networks:
+      - api_network
 
   mysql:
     image: registry.cn-hangzhou.aliyuncs.com/mymiddle/mysql:8.2
     container_name: mysql
     restart: always
+    networks:
+      - api_network
     environment:
       MYSQL_ROOT_PASSWORD: 123456 # Ensure this matches the password in SQL_DSN
       MYSQL_DATABASE: new-api
     volumes:
-      - mysql_data:/var/lib/mysql
-    # ports:
-    #   - "3306:3306"  # If you want to access MySQL from outside Docker, uncomment
+      - new_api_mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306" # If you want to access MySQL from outside Docker, uncomment
 
 volumes:
   new_api_mysql_data:
   new_api_data:
   new_api_logs:
+
+networks:
+  api_network:
+    driver: bridge
